@@ -166,11 +166,6 @@ const handleSignup = async (e: React.FormEvent) => {
 
   newErrors.fullName = !fullName.trim() ? "Full name is required" : undefined;
   newErrors.email = validateEmail(email);
-  newErrors.password = validatePassword(password);
-
-  if (password !== confirmPassword) {
-    newErrors.confirmPassword = "Passwords do not match";
-  }
 
   const filtered = Object.fromEntries(
     Object.entries(newErrors).filter(([, v]) => v !== undefined)
@@ -189,7 +184,7 @@ const handleSignup = async (e: React.FormEvent) => {
   setIsSubmitting(false);
 
   if (!error) {
-    setMode('reset-sent'); // Show "Check Email"
+    setMode('reset-sent');
   } else {
     setErrors({ general: error });
   }
@@ -216,10 +211,14 @@ onClick={(e) => e.stopPropagation()}
           <img src={LOGO_URL} alt="Logo" className="w-12 h-12 object-contain" />
         </div>
 
-        <h2 className="text-xl font-bold text-white">Welcome Back</h2>
-        <p className="text-sm text-slate-400 mt-1">
-          Sign in to your account
-        </p>
+        <h2 className="text-xl font-bold text-white">
+  {mode === 'signup' ? 'Create Account' : 'Welcome Back'}
+</h2>
+<p className="text-sm text-slate-400 mt-1">
+  {mode === 'signup'
+    ? 'Sign up to get started'
+    : 'Sign in to your account'}
+</p>
       </div>
     </div>
 
@@ -232,8 +231,19 @@ onClick={(e) => e.stopPropagation()}
           <span>{errors.general}</span>
         </div>
       )}
-
+{mode !== 'reset-sent' && (
      <form onSubmit={mode === 'signup' ? handleSignup : handleLogin} className="space-y-4">
+      {mode === 'signup' && (
+  <InputField
+    icon={User}
+    label="Full Name"
+    type="text"
+    value={fullName}
+    onChange={setFullName}
+    placeholder="John Doe"
+    error={errors.fullName}
+  />
+)}
         <InputField
           icon={Mail}
           label="Email"
@@ -244,18 +254,20 @@ onClick={(e) => e.stopPropagation()}
           error={errors.email}
         />
 
-        <InputField
-          icon={Lock}
-          label="Password"
-          type="password"
-          value={password}
-          onChange={setPassword}
-          placeholder="Enter your password"
-          error={errors.password}
-          showToggle
-          isVisible={showPassword}
-          onToggleVisibility={() => setShowPassword(!showPassword)}
-        />
+       {mode === 'login' && (
+  <InputField
+    icon={Lock}
+    label="Password"
+    type="password"
+    value={password}
+    onChange={setPassword}
+    placeholder="Enter your password"
+    error={errors.password}
+    showToggle
+    isVisible={showPassword}
+    onToggleVisibility={() => setShowPassword(!showPassword)}
+  />
+)}
 
         <div className="flex items-center justify-between">
           <label className="flex items-center gap-2 cursor-pointer">
@@ -278,9 +290,25 @@ onClick={(e) => e.stopPropagation()}
           disabled={isSubmitting}
           className="w-full py-3 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
         >
-          {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing in..</> : 'Sign In'}
+          {isSubmitting ? (
+  <>
+    <Loader2 className="w-4 h-4 animate-spin" />
+    {mode === 'signup' ? "Creating account..." : "Signing in..."}
+  </>
+) : (
+  mode === 'signup' ? "Create Account" : "Sign In"
+)}
         </button>
-      </form>
+     </form>
+)}
+      {mode === 'reset-sent' && (
+  <div className="text-center py-6">
+    <Check className="w-10 h-10 text-green-500 mx-auto mb-3" />
+    <p className="text-sm text-gray-600">
+      Account created! Please check your email to set your password.
+    </p>
+  </div>
+)}
 
     </div>
   </div>
